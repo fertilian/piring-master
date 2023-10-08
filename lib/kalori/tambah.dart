@@ -203,8 +203,7 @@ class _TambahKaloriState extends State<TambahKalori> {
                             height: 20,
                           ),
                           Container(
-                            height: MediaQuery.of(context).size.height *
-                                0.7, // Set a fixed height here
+                            height: 340,
                             child: ListView.builder(
                               itemCount: foodData.length,
                               itemBuilder: (context, index) {
@@ -232,6 +231,30 @@ class _TambahKaloriState extends State<TambahKalori> {
                               },
                             ),
                           ),
+                          Divider(
+                            thickness: 5,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                                style: ButtonStyle(
+                                    fixedSize:
+                                        MaterialStatePropertyAll(Size(200, 30)),
+                                    shape: MaterialStatePropertyAll(
+                                        ContinuousRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20)))),
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Kalori(),
+                                      ));
+                                },
+                                child: Text('Simpan')),
+                          )
                         ],
                       ),
                     ],

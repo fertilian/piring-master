@@ -13,6 +13,7 @@ class Kalori extends StatefulWidget {
 }
 
 class _KaloriState extends State<Kalori> {
+  int roundedTotal = 0;
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
   String tokenUrl =
@@ -64,6 +65,19 @@ class _KaloriState extends State<Kalori> {
         final List<Map<String, dynamic>> riwayatData =
             data.cast<Map<String, dynamic>>();
 
+        double totalBesaran = 0;
+
+        // Iterasi melalui data makanan dan tambahkan besaran ke total
+        for (var makanan in riwayatData) {
+          final besaran = double.parse(makanan['energi']);
+          totalBesaran += besaran;
+        }
+        roundedTotal = totalBesaran.round();
+
+        // Cetak total besaran
+        print('Total Besaran: $totalBesaran');
+        print(roundedTotal);
+
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -102,6 +116,7 @@ class _KaloriState extends State<Kalori> {
   void initState() {
     super.initState();
     getToken();
+    fetchRiwayatHariIni();
   }
 
   @override
@@ -161,7 +176,7 @@ class _KaloriState extends State<Kalori> {
                             ),
                           ),
                           SizedBox(
-                            height: 60,
+                            height: 10,
                           ),
                           Container(
                             padding: EdgeInsets.only(left: 15),
@@ -216,7 +231,7 @@ class _KaloriState extends State<Kalori> {
                                       color: Color.fromARGB(255, 229, 222, 156),
                                       borderRadius: BorderRadius.circular(10)),
                                   child: Text(
-                                    "1191 Kkal",
+                                    "$roundedTotal Kkal",
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 16,
@@ -477,7 +492,10 @@ class _KaloriState extends State<Kalori> {
                                 Container(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      fetchRiwayatHariIni();
+                                      fetchRiwayatHariIni().then((_) {
+                                        // Setelah selesai mendapatkan data, perbarui tampilan
+                                        setState(() {});
+                                      });
                                     },
                                     child: Text('Riwayat Hari Ini'),
                                   ),

@@ -5,6 +5,7 @@ import 'package:marquee/marquee.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:piring_baru/Login/components/login_form.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
+import 'package:piring_baru/kalori/testingTotalKalori.dart';
 
 import 'package:piring_baru/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -451,6 +452,17 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
+          Center(
+            child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TestingTotal(),
+                      ));
+                },
+                child: Text('testing')),
+          )
 
           // Gunakan ListView.builder untuk membuat daftar informasi gizi & kesehatan
         ],
