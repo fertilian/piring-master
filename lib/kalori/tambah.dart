@@ -13,12 +13,15 @@ class TambahKalori extends StatefulWidget {
 }
 
 class _TambahKaloriState extends State<TambahKalori> {
+  TextEditingController searchController = TextEditingController();
+  List<Map<String, dynamic>> filteredFoodData = [];
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
   String tokenUrl = "https://isipiringku.esolusindo.com/api/Token/token";
   String apiUrl = "https://isipiringku.esolusindo.com/api/Konsumsi/Konsumsi";
   String accessToken = "";
   List<Map<String, dynamic>> foodData = [];
+  bool isSearching = false;
 
   Future<void> getToken() async {
     try {
@@ -73,8 +76,24 @@ class _TambahKaloriState extends State<TambahKalori> {
       fetchData().then((data) {
         setState(() {
           foodData = data;
+          filteredFoodData = data; // Menginisialisasi dengan data asli
         });
       });
+    });
+  }
+
+  void filterFoodList(String query) {
+    setState(() {
+      if (query.isNotEmpty) {
+        isSearching = true;
+        filteredFoodData = foodData.where((foodItem) {
+          final namaMakanan = foodItem['nama_makanan'].toString().toLowerCase();
+          return namaMakanan.contains(query.toLowerCase());
+        }).toList();
+      } else {
+        isSearching = false;
+        filteredFoodData = foodData;
+      }
     });
   }
 
@@ -190,6 +209,12 @@ class _TambahKaloriState extends State<TambahKalori> {
                           Container(
                             padding: EdgeInsets.only(left: 20, right: 20),
                             child: TextFormField(
+                              controller:
+                                  searchController, // Menggunakan TextEditingController
+                              onChanged: (query) {
+                                filterFoodList(
+                                    query); // Panggil fungsi filterFoodList saat teks berubah
+                              },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -205,9 +230,13 @@ class _TambahKaloriState extends State<TambahKalori> {
                           Container(
                             height: 340,
                             child: ListView.builder(
-                              itemCount: foodData.length,
+                              itemCount: isSearching
+                                  ? filteredFoodData.length
+                                  : foodData.length,
                               itemBuilder: (context, index) {
-                                final foodItem = foodData[index];
+                                final foodItem = isSearching
+                                    ? filteredFoodData[index]
+                                    : foodData[index];
                                 return GestureDetector(
                                   onTap: () {
                                     // Memanggil kirimData dengan id_makanan sebagai id_user
@@ -219,9 +248,7 @@ class _TambahKaloriState extends State<TambahKalori> {
                                         kirimData(foodItem['id_makanan']);
                                       },
                                       child: ListTile(
-                                        title: Text('ID: ' +
-                                            foodItem['id_makanan'] +
-                                            foodItem['nama_makanan']),
+                                        title: Text(foodItem['nama_makanan']),
                                         subtitle: Text(
                                             'Energi: ${foodItem['kategori']}'),
                                       ),
