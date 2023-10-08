@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
-
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -94,28 +94,6 @@ class _RiwayatState extends State<Riwayat> {
     }
   }
 
-  double _getMaxCaloriesValue() {
-    double maxValue = 0;
-    totalCaloriesByDate.values.forEach((calories) {
-      if (calories > maxValue) {
-        maxValue = calories;
-      }
-    });
-    return maxValue;
-  }
-
-  List<FlSpot> _getChartData() {
-    final List<FlSpot> spots = [];
-    int index = 0;
-
-    totalCaloriesByDate.forEach((date, calories) {
-      spots.add(FlSpot(index.toDouble(), calories));
-      index++;
-    });
-
-    return spots;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -179,56 +157,38 @@ class _RiwayatState extends State<Riwayat> {
                             ),
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 30,
                           ),
                           Container(
-                            height: 300,
-                            width: double.infinity,
-                            child: LineChart(
-                              LineChartData(
-                                gridData: const FlGridData(show: true),
-
-                                titlesData: FlTitlesData(
-                                  topTitles: const AxisTitles(
-                                      sideTitles:
-                                          SideTitles(showTitles: false)),
-                                  rightTitles: const AxisTitles(
-                                      sideTitles:
-                                          SideTitles(showTitles: false)),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      interval: 700,
-                                    ),
-                                    axisNameSize: 10,
-                                  ),
+                            height:
+                                200, // Atur tinggi grafik sesuai kebutuhan Anda
+                            child: SfCartesianChart(
+                              isTransposed: true,
+                              // Konfigurasi jenis grafik menjadi BarSeries
+                              series: <ChartSeries>[
+                                BarSeries<Map<String, dynamic>, String>(
+                                  spacing: 0,
+                                  dataSource:
+                                      _getChartData(), // Sumber data dari listview yang difilter
+                                  xValueMapper:
+                                      (Map<String, dynamic> data, _) => data[
+                                          'date'], // Kolom tanggal dari sumber data
+                                  yValueMapper:
+                                      (Map<String, dynamic> data, _) => data[
+                                          'totalCalories'], // Kolom total kalori dari sumber data
+                                  name: 'Total Kalori',
+                                  width: 0.4,
                                 ),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: Border.all(
-                                      color: const Color(0xff37434d), width: 1),
-                                ),
-                                minX: 0,
-                                maxX: totalCaloriesByDate.length.toDouble() - 1,
-                                minY: 0,
-                                maxY:
-                                    _getMaxCaloriesValue(), // Tentukan nilai maksimum di sini
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    spots:
-                                        _getChartData(), // Buat data grafik di sini
-                                    isCurved: true,
-                                    color: const Color(0xff4af699),
-                                    dotData: const FlDotData(show: false),
-                                    belowBarData: BarAreaData(show: false),
-                                  ),
-                                ],
+                              ],
+                              primaryXAxis: CategoryAxis(),
+                              primaryYAxis: NumericAxis(
+                                title: AxisTitle(text: 'Total Kalori'),
                               ),
                             ),
                           ),
                           const SizedBox(height: 10),
                           Container(
-                            height: 400,
+                            height: 10,
                             width: double.infinity,
                             child: ListView.separated(
                               itemCount: totalCaloriesByDate
@@ -245,7 +205,8 @@ class _RiwayatState extends State<Riwayat> {
                                 return ListTile(
                                   title: Text("Tanggal: $dateKey"),
                                   subtitle: Text(
-                                      "Total Kalori: $totalCaloriesForDate"),
+                                    "Total Kalori: $totalCaloriesForDate",
+                                  ),
                                 );
                               },
                             ),
@@ -287,5 +248,21 @@ class _RiwayatState extends State<Riwayat> {
         ]),
       ),
     );
+  }
+
+  List<Map<String, dynamic>> _getChartData() {
+    List<Map<String, dynamic>> chartData = [];
+
+    // Iterate melalui data makanan yang sudah difilter
+    for (String dateKey in totalCaloriesByDate.keys) {
+      double? totalCalories = totalCaloriesByDate[dateKey];
+
+      chartData.add({
+        'date': dateKey,
+        'totalCalories': totalCalories,
+      });
+    }
+
+    return chartData;
   }
 }
