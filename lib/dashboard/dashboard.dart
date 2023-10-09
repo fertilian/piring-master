@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
@@ -6,7 +7,8 @@ import 'package:page_transition/page_transition.dart';
 import 'package:piring_baru/Login/components/login_form.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
 import 'package:piring_baru/kalori/testingTotalKalori.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:piring_baru/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +20,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  List<dynamic> data = [];
   String Nama = '';
   String Email = '';
 
@@ -29,6 +32,17 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     loadUserData();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final response = await http.get(
+        Uri.parse('https://isipiringku.esolusindo.com/api/Gambar/getgambar'));
+    if (response.statusCode == 200) {
+      setState(() {
+        data = json.decode(response.body)['response'];
+      });
+    }
   }
 
   Future<void> loadUserData() async {
@@ -305,12 +319,11 @@ class _DashboardState extends State<Dashboard> {
           SizedBox(
             height: 10,
           ),
-
           Container(
             height: 130,
             child: ListView.builder(
               itemExtent: 250,
-              itemCount: 5, // Jumlah card yang ingin ditampilkan
+              itemCount: data.length, // Jumlah card yang ingin ditampilkan
               scrollDirection:
                   Axis.horizontal, // Untuk menggeser card ke samping
               itemBuilder: (BuildContext context, int index) {
@@ -326,6 +339,7 @@ class _DashboardState extends State<Dashboard> {
                 return Padding(
                   padding: EdgeInsets.all(10.0), // Spasi antar card
                   child: Container(
+                    padding: EdgeInsets.only(left: 10, right: 10),
                     width: 250, // Lebar card
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.0),
@@ -338,29 +352,42 @@ class _DashboardState extends State<Dashboard> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Padding(padding: EdgeInsets.only(left: 10, right: 10)),
                         // Gambar dari asset
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  data[index][
+                                      'judul_artikel'], // Ganti dengan deskripsi yang sesuai
+                                  style: TextStyle(
+                                    color: Colors
+                                        .white, // Warna teks pada latar belakang gradient
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              // Tambahkan widget lainnya di sini jika diperlukan
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 10), // Spasi antara gambar dan judul
                         Container(
-                          child: Text(
-                            'Deskripsi \nGambar $index', // Ganti dengan deskripsi yang sesuai
-                            style: TextStyle(
-                              color: Colors
-                                  .white, // Warna teks pada latar belakang gradient
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
+                          width: 90, // Lebar gambar
+                          height: 90, // Tinggi gambar
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.network(
+                              data[index]['url'],
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        SizedBox(width: 30),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            'assets/images/shusi.webp',
-                            width: 90, // Ubah sesuai dengan kebutuhan
-                            height: 90,
-                            fit: BoxFit.cover,
-                          ),
-                        )
                       ],
                     ),
                   ),
@@ -368,6 +395,81 @@ class _DashboardState extends State<Dashboard> {
               },
             ),
           ),
+
+          // Container(
+          //   height: 130,
+          //   child: ListView.builder(
+          //     itemExtent: 250,
+          //     itemCount: data.length,
+          //     scrollDirection: Axis.horizontal,
+          //     itemBuilder: (context, index) {
+          //       // Generate a random color for the gradient
+          //       final Color randomColor =
+          //           Color(0xFF000000 + Random().nextInt(0xFFFFFF));
+
+          //       return Card(
+          //         child: Container(
+          //           height: 150,
+          //           width: 150,
+          //           decoration: BoxDecoration(
+          //             borderRadius: BorderRadius.circular(
+          //                 30.0), // Tambahkan BorderRadius di sini
+          //             gradient: LinearGradient(
+          //               begin: Alignment.topLeft,
+          //               end: Alignment.bottomRight,
+          //               colors: [
+          //                 Colors.white,
+          //                 randomColor,
+          //               ],
+          //             ),
+          //           ),
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.start,
+          //             children: [
+          //               Padding(padding: EdgeInsets.only(left: 10, right: 10)),
+          //               // Text(data[index]['judul_artikel']),
+          //               Container(
+          //                 child: Text(
+          //                   data[index][
+          //                       'judul_artikel'], // Ganti dengan deskripsi yang sesuai
+          //                   style: TextStyle(
+          //                     color: Colors
+          //                         .white, // Warna teks pada latar belakang gradient
+          //                     fontSize: 16.0,
+          //                     fontWeight: FontWeight.bold,
+          //                   ),
+          //                 ),
+          //               ),
+          //               SizedBox(
+          //                 width: 30,
+          //               ),
+          //               ClipRRect(
+          //                 borderRadius: BorderRadius.circular(20),
+          //                 child: Image.network(
+          //                   data[index]['url'],
+          //                   width: 90, // Ubah sesuai dengan kebutuhan
+          //                   height: 90,
+          //                   fit: BoxFit.cover,
+          //                 ),
+          //               )
+          //               // Container(
+
+          //               //   decoration: BoxDecoration(
+          //               //       borderRadius: BorderRadius.circular(20)),
+          //               //   child: Image.network(
+
+          //               //     data[index]['url'],
+          //               //     height: 140,
+          //               //     width: 140,
+          //               //   ),
+          //               // ),
+          //             ],
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
           SizedBox(height: 20),
 
           Container(

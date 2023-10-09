@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
 import 'package:piring_baru/kalori/tambah.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class Kalori extends StatefulWidget {
   const Kalori({super.key});
@@ -13,7 +14,8 @@ class Kalori extends StatefulWidget {
 }
 
 class _KaloriState extends State<Kalori> {
-  int roundedTotal = 0;
+  double totalEnergi = 0.0;
+  String formattedDate = DateFormat('dd-mm-yyyy').format(DateTime.now());
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
   String tokenUrl =
@@ -50,73 +52,34 @@ class _KaloriState extends State<Kalori> {
     }
   }
 
-  Future<void> fetchRiwayatHariIni() async {
-    try {
-      var response = await http.get(
-        Uri.parse(
-            'https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=36&waktu=2023-10-4'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
+  List<dynamic> data = [];
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body)['response'] as List<dynamic>;
-        final List<Map<String, dynamic>> riwayatData =
-            data.cast<Map<String, dynamic>>();
+  Future fetchData() async {
+    final response = await http.get(
+      Uri.parse(
+        'https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=36&waktu=2023-10-4',
+      ),
+    );
 
-        double totalBesaran = 0;
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      setState(() {
+        data = jsonResponse['response'];
 
-        // Iterasi melalui data makanan dan tambahkan besaran ke total
-        for (var makanan in riwayatData) {
-          final besaran = double.parse(makanan['energi']);
-          totalBesaran += besaran;
-        }
-        roundedTotal = totalBesaran.round();
-
-        // Cetak total besaran
-        print('Total Besaran: $totalBesaran');
-        print(roundedTotal);
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Riwayat Hari Ini'),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: riwayatData.map((item) {
-                    return ListTile(
-                      title: Text(item['nama_makanan']),
-                      subtitle: Text('Besaran: ${item['besaran']}'),
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('Tutup'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        print('Gagal mengambil data riwayat: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Gagal mengambil data riwayat: $e');
+        // Hitung total energi
+        totalEnergi = data
+            .map((item) => double.parse(item['energi']))
+            .fold(0.0, (prev, curr) => prev + curr); // Change 0 to 0.0
+      });
+    } else {
+      throw Exception('Failed to load data');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    getToken();
-    fetchRiwayatHariIni();
+    fetchData();
   }
 
   @override
@@ -198,7 +161,7 @@ class _KaloriState extends State<Kalori> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  '04-06-2023',
+                                  formattedDate,
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
@@ -231,7 +194,7 @@ class _KaloriState extends State<Kalori> {
                                       color: Color.fromARGB(255, 229, 222, 156),
                                       borderRadius: BorderRadius.circular(10)),
                                   child: Text(
-                                    "$roundedTotal Kkal",
+                                    "${totalEnergi.toInt()} Kkal",
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 16,
@@ -486,18 +449,6 @@ class _KaloriState extends State<Kalori> {
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(height: 70),
-                                Container(
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      fetchRiwayatHariIni().then((_) {
-                                        // Setelah selesai mendapatkan data, perbarui tampilan
-                                        setState(() {});
-                                      });
-                                    },
-                                    child: Text('Riwayat Hari Ini'),
                                   ),
                                 ),
                               ],

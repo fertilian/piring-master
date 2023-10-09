@@ -156,6 +156,20 @@ class _RiwayatState extends State<Riwayat> {
                               ),
                             ),
                           ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Text(
+                                  'Grafik Konsumsi Kalori Selama 7 Hari Terakhir',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              )
+                            ],
+                          ),
                           const SizedBox(
                             height: 30,
                           ),
@@ -211,9 +225,10 @@ class _RiwayatState extends State<Riwayat> {
                               },
                             ),
                           ),
-                          Column(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
+                              Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
@@ -225,7 +240,7 @@ class _RiwayatState extends State<Riwayat> {
                                   ),
                                 ],
                               ),
-                              Row(
+                              Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
