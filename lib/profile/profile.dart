@@ -801,7 +801,7 @@ class _ProfileState extends State<Profile> {
                                   ),
                                   child: Text(
                                       'Edit Profile'), // Teks yang akan ditampilkan pada tombol
-                                ), //borderRadius: BorderRadius.circular(8),elevation: 3,fontFamily: 'Readex Pro',color: Colors.white,fontSize: 14,
+                                ), 
                               ),
                             ),
                             Align(

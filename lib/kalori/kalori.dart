@@ -14,8 +14,9 @@ class Kalori extends StatefulWidget {
 }
 
 class _KaloriState extends State<Kalori> {
+  final Map<String, List<Map<String, dynamic>>> groupedData = {};
   double totalEnergi = 0.0;
-  String formattedDate = DateFormat('dd-mm-yyyy').format(DateTime.now());
+  String formattedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
   String tokenUrl =
@@ -57,7 +58,7 @@ class _KaloriState extends State<Kalori> {
   Future fetchData() async {
     final response = await http.get(
       Uri.parse(
-        'https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=36&waktu=2023-10-4',
+        'https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=36&waktu=2023-10-9',
       ),
     );
 
@@ -465,7 +466,77 @@ class _KaloriState extends State<Kalori> {
                                       ),
                                     ),
                                   ),
-                                )
+                                ),
+                                SizedBox(
+                                  height: 50,
+                                ),
+                                Center(
+                                    child: ElevatedButton(
+                                        onPressed: () {
+                                          data.forEach((item) {
+                                            final namaMakanan =
+                                                item['nama_makanan'];
+                                            if (!groupedData
+                                                .containsKey(namaMakanan)) {
+                                              groupedData[namaMakanan] = [item];
+                                            } else {
+                                              groupedData[namaMakanan]
+                                                  ?.add(item);
+                                            }
+                                          });
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text(
+                                                  'Riwayat Hari Ini',
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                content: SingleChildScrollView(
+                                                  child: Column(
+                                                    children: groupedData
+                                                        .entries
+                                                        .map((entry) {
+                                                      final namaMakanan =
+                                                          entry.key;
+                                                      final makananList =
+                                                          entry.value;
+                                                      final jumlahMakanan =
+                                                          makananList.length;
+                                                      final totalEnergi = makananList
+                                                          .map((item) =>
+                                                              double.parse(item[
+                                                                  'energi']))
+                                                          .fold(
+                                                              0.0,
+                                                              (prev, curr) =>
+                                                                  prev + curr);
+
+                                                      return ListTile(
+                                                        title: Text(
+                                                            '$namaMakanan (x$jumlahMakanan)'),
+                                                        subtitle: Text(
+                                                            'Total Energi: ${totalEnergi.toInt()}'),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ),
+                                                actions: <Widget>[
+                                                  Text(
+                                                      'Total Energi: ${totalEnergi.toInt()}'),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: Text('Tutup'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        child: Text('Riwayat Hari Ini')))
                               ],
                             ),
                           ),

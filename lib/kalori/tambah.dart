@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
 import 'package:piring_baru/kalori/kalori.dart';
+import 'package:piring_baru/model/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TambahKalori extends StatefulWidget {
-  const TambahKalori({super.key});
+  const TambahKalori({
+    super.key,
+  });
 
   @override
   State<TambahKalori> createState() => _TambahKaloriState();
@@ -14,6 +19,7 @@ class TambahKalori extends StatefulWidget {
 
 class _TambahKaloriState extends State<TambahKalori> {
   List<int> cardValues = [];
+  List<Map<String, dynamic>> selectedFoods = [];
 
   TextEditingController searchController = TextEditingController();
   List<Map<String, dynamic>> filteredFoodData = [];
@@ -25,6 +31,21 @@ class _TambahKaloriState extends State<TambahKalori> {
   List<Map<String, dynamic>> foodData = [];
   bool isSearching = false;
   int cardValue = 0;
+  String Id = '';
+
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+
+    if (userDataString != null) {
+      final userData = UserData.fromJson(json.decode(userDataString));
+      print(userData.nama);
+
+      setState(() {
+        Id = userData.idUser.toString();
+      });
+    }
+  }
 
   Future<void> getToken() async {
     try {
@@ -75,6 +96,7 @@ class _TambahKaloriState extends State<TambahKalori> {
   @override
   void initState() {
     super.initState();
+    loadUserData();
     getToken().then((_) {
       fetchData().then((data) {
         setState(() {
@@ -105,6 +127,7 @@ class _TambahKaloriState extends State<TambahKalori> {
 
   Future<void> kirimData(String idMakanan, int index) async {
     try {
+      var energi = foodData[index]['energi'].toString();
       var response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -112,11 +135,10 @@ class _TambahKaloriState extends State<TambahKalori> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'id_user': '36',
-          'total_kalori': '200',
+          'id_user': Id,
+          'total_kalori': energi,
           'keterangan': 'sarapan',
-          'bahan_makanan_nama_makanan':
-              idMakanan, // Menggunakan ID makanan yang dipilih
+          'bahan_makanan_nama_makanan': idMakanan,
         }),
       );
 
@@ -127,6 +149,21 @@ class _TambahKaloriState extends State<TambahKalori> {
         setState(() {
           cardValues[index] += 1;
         });
+
+        var selectedFood = selectedFoods.firstWhereOrNull(
+          (food) => food['id_makanan'] == idMakanan,
+        );
+
+        if (selectedFood == null) {
+          // Jika makanan belum ada di dalam selectedFoods, tambahkan makanan tersebut
+          selectedFoods.add({
+            ...foodData[index],
+            'jumlahDipilih': 1,
+          });
+        } else {
+          // Jika makanan sudah ada di dalam selectedFoods, tambahkan 1 ke properti jumlahDipilih
+          selectedFood['jumlahDipilih'] += 1;
+        }
 
         Fluttertoast.showToast(
           msg: 'Berhasil Kirim Data',
@@ -234,7 +271,7 @@ class _TambahKaloriState extends State<TambahKalori> {
                             height: 20,
                           ),
                           Container(
-                            height: 340,
+                            height: 200,
                             child: ListView.builder(
                               itemCount: isSearching
                                   ? filteredFoodData.length
@@ -257,12 +294,12 @@ class _TambahKaloriState extends State<TambahKalori> {
                                       child: ListTile(
                                         title: Text(foodItem['nama_makanan']),
                                         subtitle: Text(
-                                            'Energi: ${foodItem['kategori']}'),
+                                            'Energi: ${foodItem['energi']}'),
                                         trailing: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                                'Jumlah: ${cardValues[index]}'), // Menampilkan angka di sebelah kanan card
+                                                '${cardValues[index]}'), // Menampilkan angka di sebelah kanan card
                                             Icon(Icons.arrow_forward_ios),
                                           ],
                                         ),
@@ -276,27 +313,49 @@ class _TambahKaloriState extends State<TambahKalori> {
                           Divider(
                             thickness: 5,
                           ),
-                          SizedBox(
-                            height: 10,
+                          Container(
+                            padding: EdgeInsets.all(20),
+                            child: Text(
+                              'Makanan yang Dipilih',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                          Center(
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                    fixedSize:
-                                        MaterialStatePropertyAll(Size(200, 30)),
-                                    shape: MaterialStatePropertyAll(
-                                        ContinuousRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)))),
-                                onPressed: () {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Kalori(),
-                                      ));
-                                },
-                                child: Text('Simpan')),
-                          )
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: selectedFoods.length,
+                            itemBuilder: (context, index) {
+                              final selectedFood = selectedFoods[index];
+                              final namaMakanan = selectedFood['nama_makanan'];
+
+                              // Mengambil energi dari selectedFood sebagai String
+                              final energiString = selectedFood['energi'];
+
+                              // Mengonversi energiString ke tipe data int jika angka yang valid
+                              final energi =
+                                  double.tryParse(energiString) ?? 0.0;
+
+                              final jumlahDipilih =
+                                  selectedFood['jumlahDipilih'] as int;
+
+                              // Melakukan perhitungan energi * jumlahDipilih
+                              final totalEnergi = energi * jumlahDipilih;
+                              print('energiString: $energiString');
+                              print('jumlahDipilih: $jumlahDipilih');
+                              print('totalEnergi: $totalEnergi');
+
+                              return Card(
+                                child: ListTile(
+                                  title: Text('$namaMakanan (x$jumlahDipilih)'),
+                                  subtitle: Text(
+                                      'Total Energi: $totalEnergi'), // Menampilkan total energi
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ],

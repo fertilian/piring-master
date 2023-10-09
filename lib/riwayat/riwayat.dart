@@ -202,7 +202,7 @@ class _RiwayatState extends State<Riwayat> {
                           ),
                           const SizedBox(height: 10),
                           Container(
-                            height: 10,
+                            height: 5,
                             width: double.infinity,
                             child: ListView.separated(
                               itemCount: totalCaloriesByDate
