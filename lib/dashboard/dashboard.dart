@@ -20,7 +20,11 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  Map<String, dynamic>? forIMT;
+  String imtText = '';
+
   List<dynamic> data = [];
+  List<dynamic> articles = [];
   String Nama = '';
   String Email = '';
 
@@ -28,11 +32,52 @@ class _DashboardState extends State<Dashboard> {
   String BB = '';
   String Id = '';
   String umur = '';
+
   @override
   void initState() {
     super.initState();
     loadUserData();
     fetchData();
+    fetchData2();
+    fetchData3();
+  }
+
+  Future<void> fetchData3() async {
+    final response = await http.get(
+      Uri.parse(
+          'https://isipiringku.esolusindo.com/api/DataUser/DataUser?id_user=36'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      forIMT = data['response'][0];
+
+      final tinggiBadanCm = double.parse(forIMT!['tinggi_badan']);
+      final beratBadanKg = double.parse(forIMT!['berat_badan']);
+
+      final tinggiBadanM = tinggiBadanCm / 100;
+      final imt = beratBadanKg / (tinggiBadanM * tinggiBadanM);
+
+      imtText = '${imt.toStringAsFixed(2)}';
+    } else {
+      throw Exception('Failed to load data from API');
+    }
+  }
+
+  Future<void> fetchData2() async {
+    final Uri apiUrl =
+        Uri.parse('https://isipiringku.esolusindo.com/api/Artikel/getArtikel');
+    final response = await http.get(apiUrl);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> responseList = data['response'];
+      setState(() {
+        articles = responseList;
+      });
+    } else {
+      throw Exception('Failed to load data from API');
+    }
   }
 
   Future<void> fetchData() async {
@@ -260,15 +305,17 @@ class _DashboardState extends State<Dashboard> {
                               SizedBox(
                                 height: 20.0,
                               ),
-                              Text(
-                                '18.7',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                              forIMT == null
+                                  ? CircularProgressIndicator()
+                                  : Text(
+                                      imtText,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                             ],
                           ),
                         ],
@@ -396,109 +443,40 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-          // Container(
-          //   height: 130,
-          //   child: ListView.builder(
-          //     itemExtent: 250,
-          //     itemCount: data.length,
-          //     scrollDirection: Axis.horizontal,
-          //     itemBuilder: (context, index) {
-          //       // Generate a random color for the gradient
-          //       final Color randomColor =
-          //           Color(0xFF000000 + Random().nextInt(0xFFFFFF));
-
-          //       return Card(
-          //         child: Container(
-          //           height: 150,
-          //           width: 150,
-          //           decoration: BoxDecoration(
-          //             borderRadius: BorderRadius.circular(
-          //                 30.0), // Tambahkan BorderRadius di sini
-          //             gradient: LinearGradient(
-          //               begin: Alignment.topLeft,
-          //               end: Alignment.bottomRight,
-          //               colors: [
-          //                 Colors.white,
-          //                 randomColor,
-          //               ],
-          //             ),
-          //           ),
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.start,
-          //             children: [
-          //               Padding(padding: EdgeInsets.only(left: 10, right: 10)),
-          //               // Text(data[index]['judul_artikel']),
-          //               Container(
-          //                 child: Text(
-          //                   data[index][
-          //                       'judul_artikel'], // Ganti dengan deskripsi yang sesuai
-          //                   style: TextStyle(
-          //                     color: Colors
-          //                         .white, // Warna teks pada latar belakang gradient
-          //                     fontSize: 16.0,
-          //                     fontWeight: FontWeight.bold,
-          //                   ),
-          //                 ),
-          //               ),
-          //               SizedBox(
-          //                 width: 30,
-          //               ),
-          //               ClipRRect(
-          //                 borderRadius: BorderRadius.circular(20),
-          //                 child: Image.network(
-          //                   data[index]['url'],
-          //                   width: 90, // Ubah sesuai dengan kebutuhan
-          //                   height: 90,
-          //                   fit: BoxFit.cover,
-          //                 ),
-          //               )
-          //               // Container(
-
-          //               //   decoration: BoxDecoration(
-          //               //       borderRadius: BorderRadius.circular(20)),
-          //               //   child: Image.network(
-
-          //               //     data[index]['url'],
-          //               //     height: 140,
-          //               //     width: 140,
-          //               //   ),
-          //               // ),
-          //             ],
-          //           ),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          // ),
           SizedBox(height: 20),
-
           Container(
-              padding: (EdgeInsets.only(left: 40)),
-              child: Text(
-                'Informasi Gizi Kesehatan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              )),
+            height: 175,
+            child: ListView(
+              children: articles.map((article) {
+                final String imageUrl = article['gambar_artikel'];
+                final String judul = article['judul'];
 
-          // Informasi Gizi & Kesehatan (5 CardViews)
-          Container(
-            height: 280, // Tinggi container
-            child: Column(
-              children: [
-                buildCard('Deskripsi Card 0', 130),
-                SizedBox(
-                  height: 15,
-                ),
-                buildCard('Deskripsi Card 1', 130),
-                SizedBox(
-                  height: 15,
-                ),
-                buildCard('Deskripsi Card 2', 130),
-                // Tambahkan card lainnya di sini sesuai kebutuhan
-              ],
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Image.network(
+                          imageUrl,
+                          width:
+                              100, // Sesuaikan dengan ukuran gambar yang Anda inginkan
+                          height:
+                              50, // Sesuaikan dengan ukuran gambar yang Anda inginkan
+                        ),
+                        SizedBox(width: 16),
+                        Text(
+                          judul,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-          ),
-          SizedBox(
-            height: 10,
           ),
 
           Container(
@@ -548,77 +526,10 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                 ),
-                // Card kedua (Salin dan sesuaikan elemen di atas untuk card selanjutnya)
-
-                // Card ketiga (Salin dan sesuaikan elemen di atas untuk card selanjutnya)
               ],
             ),
           ),
-          Center(
-            child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TestingTotal(),
-                      ));
-                },
-                child: Text('testing')),
-          )
-
-          // Gunakan ListView.builder untuk membuat daftar informasi gizi & kesehatan
         ],
-      ),
-    );
-  }
-
-  Widget buildCard(String description, int calories) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      margin: EdgeInsets.only(left: 20, right: 20),
-      child: Padding(
-        padding: EdgeInsets.all(15.0),
-        child: Row(
-          children: [
-            Container(
-              width: 50.0,
-              height: 50.0,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                image: DecorationImage(
-                  image: AssetImage('assets/images/shusi.webp'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(width: 15.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Text('irisan susi mantap')
-                ],
-              ),
-            ),
-            SizedBox(width: 30),
-            Column(
-              children: [
-                Center(child: Text(' 130 \nkalori')),
-              ],
-            )
-          ],
-        ),
       ),
     );
   }

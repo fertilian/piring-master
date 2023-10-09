@@ -7,7 +7,7 @@ class Konsumsi extends REST_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ModelAuth");
+        // $this->load->model("ModelAuth");
     }
 
     public function joinkonsum($id_user){

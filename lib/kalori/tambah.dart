@@ -13,6 +13,8 @@ class TambahKalori extends StatefulWidget {
 }
 
 class _TambahKaloriState extends State<TambahKalori> {
+  List<int> cardValues = [];
+
   TextEditingController searchController = TextEditingController();
   List<Map<String, dynamic>> filteredFoodData = [];
   String clientId = "PKL2023";
@@ -22,6 +24,7 @@ class _TambahKaloriState extends State<TambahKalori> {
   String accessToken = "";
   List<Map<String, dynamic>> foodData = [];
   bool isSearching = false;
+  int cardValue = 0;
 
   Future<void> getToken() async {
     try {
@@ -77,6 +80,9 @@ class _TambahKaloriState extends State<TambahKalori> {
         setState(() {
           foodData = data;
           filteredFoodData = data; // Menginisialisasi dengan data asli
+
+          // Inisialisasi cardValues dengan panjang yang sesuai
+          cardValues = List.filled(foodData.length, 0);
         });
       });
     });
@@ -97,7 +103,7 @@ class _TambahKaloriState extends State<TambahKalori> {
     });
   }
 
-  Future<void> kirimData(String idMakanan) async {
+  Future<void> kirimData(String idMakanan, int index) async {
     try {
       var response = await http.post(
         Uri.parse(apiUrl),
@@ -117,6 +123,11 @@ class _TambahKaloriState extends State<TambahKalori> {
       if (response.statusCode == 200) {
         print('Data berhasil dikirim');
         print(response.body);
+
+        setState(() {
+          cardValues[index] += 1;
+        });
+
         Fluttertoast.showToast(
           msg: 'Berhasil Kirim Data',
           toastLength: Toast.LENGTH_LONG,
@@ -124,11 +135,6 @@ class _TambahKaloriState extends State<TambahKalori> {
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Kalori(),
-            ));
       } else {
         print('Gagal mengirim data: ${response.statusCode}');
       }
@@ -240,17 +246,26 @@ class _TambahKaloriState extends State<TambahKalori> {
                                 return GestureDetector(
                                   onTap: () {
                                     // Memanggil kirimData dengan id_makanan sebagai id_user
-                                    kirimData(foodItem['id_makanan']);
+                                    kirimData(foodItem['id_makanan'], index);
                                   },
                                   child: Card(
                                     child: GestureDetector(
                                       onTap: () {
-                                        kirimData(foodItem['id_makanan']);
+                                        kirimData(
+                                            foodItem['id_makanan'], index);
                                       },
                                       child: ListTile(
                                         title: Text(foodItem['nama_makanan']),
                                         subtitle: Text(
                                             'Energi: ${foodItem['kategori']}'),
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                                'Jumlah: ${cardValues[index]}'), // Menampilkan angka di sebelah kanan card
+                                            Icon(Icons.arrow_forward_ios),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
