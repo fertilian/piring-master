@@ -53,6 +53,7 @@ dependencies:
   flutter_chart: ^0.1.6
   fl_chart: ^0.64.0
   syncfusion_flutter_charts: ^23.1.39
+  pusher_channels_flutter: ^2.2.0
 
   
 

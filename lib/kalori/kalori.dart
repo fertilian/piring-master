@@ -5,6 +5,8 @@ import 'package:piring_baru/bloc/nav/bottom_nav.dart';
 import 'package:piring_baru/kalori/tambah.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:piring_baru/model/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Kalori extends StatefulWidget {
   const Kalori({super.key});
@@ -16,13 +18,20 @@ class Kalori extends StatefulWidget {
 class _KaloriState extends State<Kalori> {
   final Map<String, List<Map<String, dynamic>>> groupedData = {};
   double totalEnergi = 0.0;
-  String formattedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+  String Id = '';
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
   String tokenUrl =
       "https://apem.esolusindo.com/API/Token/token"; // Ganti dengan URL token endpoint Anda
 
   String accessToken = "";
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserDataAndFetchData();
+  }
 
   Future<void> getToken() async {
     try {
@@ -53,17 +62,48 @@ class _KaloriState extends State<Kalori> {
     }
   }
 
+  Future<void> loadUserDataAndFetchData() async {
+    await loadUserData(); // Menunggu hingga loadUserData selesai
+    fetchData(); // Panggil fetchData setelah Id diisi
+  }
+
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDataString = prefs.getString('user_data');
+
+    if (userDataString != null) {
+      final userData = UserData.fromJson(json.decode(userDataString));
+      print(userData.nama);
+
+      setState(() {
+        Id = userData.idUser.toString();
+      });
+    }
+  }
+
   List<dynamic> data = [];
 
-  Future fetchData() async {
+  Future<void> fetchData() async {
+    if (Id.isEmpty) {
+      // Pastikan Id tidak kosong sebelum membuat permintaan http
+      return;
+    }
+
+    print(Id);
+    String fetkal =
+        "https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=$Id&waktu=$formattedDate";
     final response = await http.get(
-      Uri.parse(
-        'https://isipiringku.esolusindo.com/api/Makanan/konsumsi?id_user=36&waktu=2023-10-9',
-      ),
+      Uri.parse(fetkal),
     );
 
+    print(fetkal);
+    print(Id);
+
     if (response.statusCode == 200) {
+      print(Uri.parse);
       final jsonResponse = json.decode(response.body);
+      print(jsonResponse);
+
       setState(() {
         data = jsonResponse['response'];
 
@@ -75,12 +115,6 @@ class _KaloriState extends State<Kalori> {
     } else {
       throw Exception('Failed to load data');
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
   }
 
   @override
@@ -215,258 +249,9 @@ class _KaloriState extends State<Kalori> {
                             height: 20,
                           ),
                           Container(
-                            height: 70, // Tinggi container
-                            child: Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    // Tambahkan kode navigasi ke halaman dashboard di sini
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) {
-                                      return const TambahKalori(); // Ganti dengan halaman dashboard yang sesuai
-                                    }));
-                                  },
-                                  child: Card(
-                                    elevation: 15, // Tingkat elevasi card
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    margin: const EdgeInsets.only(
-                                        left: 20, right: 20),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0,
-                                          bottom: 5,
-                                          right:
-                                              10.0), // Padding untuk konten card
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // Gambar dari asset
-                                          Container(
-                                            width: 60.0, // Lebar gambar
-                                            height: 60.0, // Tinggi gambar
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              image: const DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/images/morning.png'),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-
-                                          const Center(
-                                            child: Text(
-                                              'SARAPAN',
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Text(''),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            height: 75, // Tinggi container
-                            child: Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    // Tambahkan kode navigasi ke halaman dashboard di sini
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) {
-                                      return const TambahKalori(); // Ganti dengan halaman dashboard yang sesuai
-                                    }));
-                                  },
-                                  child: Card(
-                                    elevation: 15, // Tingkat elevasi card
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    margin: const EdgeInsets.only(
-                                        left: 20, right: 20),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0,
-                                          bottom:
-                                              10), // Padding untuk konten card
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // Gambar dari asset
-                                          Container(
-                                            width: 60.0, // Lebar gambar
-                                            height: 60.0, // Tinggi gambar
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              image: const DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/images/sun.png'),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-
-                                          const Center(
-                                            child: Text(
-                                              'MAKAN SIANG',
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-
-                                          Container(
-                                            child: Text(''),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Container(
-                            height: 75, // Tinggi container
-                            child: Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    // Tambahkan kode navigasi ke halaman dashboard di sini
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) {
-                                      return const TambahKalori(); // Ganti dengan halaman dashboard yang sesuai
-                                    }));
-                                  },
-                                  child: Card(
-                                    elevation: 15, // Tingkat elevasi card
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    margin: const EdgeInsets.only(
-                                        left: 20, right: 20),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0,
-                                          bottom:
-                                              10), // Padding untuk konten card
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // Gambar dari asset
-                                          Container(
-                                            width: 60.0, // Lebar gambar
-                                            height: 60.0, // Tinggi gambar
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              image: const DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/images/half-moon.png'),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-
-                                          const Center(
-                                            child: Text(
-                                              'MAKAN MALAM',
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-
-                                          Container(
-                                            child: Text(''),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Container(
                             // Tinggi container
                             child: Column(
                               children: [
-                                InkWell(
-                                  onTap: () {
-                                    // Tambahkan kode navigasi ke halaman dashboard di sini
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) {
-                                      return const TambahKalori(); // Ganti dengan halaman dashboard yang sesuai
-                                    }));
-                                  },
-                                  child: Card(
-                                    elevation: 15, // Tingkat elevasi card
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    margin: const EdgeInsets.only(
-                                        left: 20, right: 20),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0,
-                                          bottom:
-                                              10), // Padding untuk konten card
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // Gambar dari asset
-                                          Container(
-                                            width: 50.0, // Lebar gambar
-                                            height: 50.0, // Tinggi gambar
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              image: const DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/images/fast-food.png'),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-
-                                          const Center(
-                                            child: Text(
-                                              'CAMILAN',
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-
-                                          Container(
-                                            child: Text(''),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
                                 SizedBox(
                                   height: 50,
                                 ),
