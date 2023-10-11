@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "86096522403",
+    "project_id": "isi-piringku-8d28c",
+    "storage_bucket": "isi-piringku-8d28c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86096522403:android:1017fe7f38e5af68a7e316",
+        "android_client_info": {
+          "package_name": "com.example.piring_baru"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5epqBAe4iBpkjxoudvs1yOSYogwoj34E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

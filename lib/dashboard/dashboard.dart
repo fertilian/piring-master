@@ -10,6 +10,8 @@ import 'package:piring_baru/kalori/testingTotalKalori.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:piring_baru/model/user.dart';
+
+import 'package:piring_baru/tambahDarah/tambahDarah.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget {
@@ -529,6 +531,14 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
+          Container(
+              child: ElevatedButton(
+                  onPressed: () {
+                    // final notificationHelper = NotificationHelper();
+                    // notificationHelper.showNotification(0,
+                    //     'Sample Notification', 'This is a sample notification');
+                  },
+                  child: Text('tambah')))
         ],
       ),
     );

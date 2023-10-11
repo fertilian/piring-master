@@ -16,6 +16,7 @@ class Kalori extends StatefulWidget {
 }
 
 class _KaloriState extends State<Kalori> {
+  List<dynamic> articles2 = [];
   final Map<String, List<Map<String, dynamic>>> groupedData = {};
   double totalEnergi = 0.0;
   String Id = '';
@@ -31,6 +32,23 @@ class _KaloriState extends State<Kalori> {
   void initState() {
     super.initState();
     loadUserDataAndFetchData();
+    fetchData2();
+  }
+
+  Future<void> fetchData2() async {
+    final Uri apiUrl2 =
+        Uri.parse('https://isipiringku.esolusindo.com/api/JadwalMakan/jadwal');
+    final response = await http.get(apiUrl2);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> responseList = data['response'];
+      setState(() {
+        articles2 = responseList;
+      });
+    } else {
+      throw Exception('Failed to load data from API');
+    }
   }
 
   Future<void> getToken() async {
@@ -247,6 +265,41 @@ class _KaloriState extends State<Kalori> {
                           ),
                           const SizedBox(
                             height: 20,
+                          ),
+                          Container(
+                            height: 350,
+                            child: ListView(
+                              children: articles2.map((article2) {
+                                final String imageUrl2 = article2['gambar'];
+                                final String judul2 = article2['nama'];
+                                print(imageUrl2);
+
+                                return Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Image.network(
+                                          imageUrl2,
+                                          width:
+                                              100, // Sesuaikan dengan ukuran gambar yang Anda inginkan
+                                          height:
+                                              50, // Sesuaikan dengan ukuran gambar yang Anda inginkan
+                                        ),
+                                        SizedBox(width: 16),
+                                        Text(
+                                          judul2,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
                           Container(
                             // Tinggi container

@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:piring_baru/Auth/firebase.dart';
 import 'package:piring_baru/Login/login_screen.dart';
 import 'package:piring_baru/bloc/nav/nav_bloc.dart';
 import 'package:piring_baru/dashboard/dashboard.dart';
@@ -10,26 +12,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 import 'package:page_transition/page_transition.dart';
+
 import 'package:piring_baru/profile/profile.dart';
 import 'package:piring_baru/riwayat/riwayat.dart';
 import 'package:provider/provider.dart';
 
-Future<void> main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  // await Firebase.initializeApp();
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print('Terjadi kesalahan saat menginisialisasi Firebase: $e');
+  }
 
-  // await flutterLocalNotificationsPlugin
-  //     .resolvePlatformSpecificImplementation<
-  //         AndroidFlutterLocalNotificationsPlugin>()
-  //     ?.createNotificationChannel(channel);
-
-  // await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-  //   alert: true,
-  //   badge: true,
-  //   sound: true,
-  // );
+  await FirebaseApi().initNotification();
   runApp(
     MultiProvider(
       // Use MultiProvider to combine multiple providers
@@ -41,6 +37,20 @@ Future<void> main() async {
       child: const MyApp(),
     ),
   );
+
+  // AwesomeNotifications().initialize(
+  //   'resource://drawable/app_icon', // Ganti dengan ikon aplikasi Anda
+  //   [
+  //     NotificationChannel(
+  //       channelKey: 'scheduled_channel',
+  //       channelName: 'Scheduled Notifications',
+  //       channelDescription: 'Scheduled Notifications Channel',
+  //     ),
+  //   ],
+  // );
+
+  // // Panggil metode untuk membuat notifikasi berulang
+  // NotificationController.createRecurringNotifications();
 }
 
 class MyApp extends StatelessWidget {

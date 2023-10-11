@@ -4,6 +4,7 @@ import 'package:piring_baru/Signup/signup_screen.dart';
 import 'package:piring_baru/components/already_have_an_account_acheck.dart';
 import 'package:piring_baru/components/constants.dart';
 import 'package:piring_baru/dashboard/dashboard.dart';
+import 'package:piring_baru/lupaPassword/inputPasswordBaru.dart';
 import 'package:piring_baru/lupaPassword/lupaPassword.dart';
 import 'package:piring_baru/model/user.dart';
 
@@ -12,18 +13,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class LoginForm extends StatefulWidget {
-  const LoginForm({
+class Lupa extends StatefulWidget {
+  const Lupa({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  State<Lupa> createState() => _LupaState();
 }
 
-class _LoginFormState extends State<LoginForm> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+class _LupaState extends State<Lupa> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _tglLahirController = TextEditingController();
 
   String clientId = "PKL2023";
   String clientSecret = "PKLSERU";
@@ -58,20 +59,20 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future<void> _login() async {
-    final String username = _usernameController.text;
-    final String password = _passwordController.text;
+    final String email = _emailController.text;
+    final String tglLahir = _tglLahirController.text;
 
     await getToken(); // Memanggil fungsi getToken untuk mendapatkan token OAuth2
 
     // Membuat request body
     final Map<String, String> data = {
-      "username": username,
-      "password": password,
+      "email": email,
+      "tgl_lahir": tglLahir,
     };
 
     // Mengirim permintaan HTTP POST ke API dengan menyertakan token
     final response = await http.post(
-      Uri.parse('https://isipiringku.esolusindo.com/api/Login/Login'),
+      Uri.parse('https://isipiringku.esolusindo.com/api/Login/lupaPassword'),
       headers: {
         'Authorization':
             'Bearer $accessToken', // Menyertakan token dalam header
@@ -94,7 +95,7 @@ class _LoginFormState extends State<LoginForm> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Dashboard(),
+            builder: (context) => pasBaru(),
           ));
     } else {
       final responseData = json.decode(response.body);
@@ -122,93 +123,52 @@ class _LoginFormState extends State<LoginForm> {
     getToken();
 
     // Periksa apakah token akses sudah ada
-    checkUserSession();
+    // checkUserSession();
   }
 
-  Future<void> checkUserSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedAccessToken = prefs.getString('access_token');
+  // Future<void> checkUserSession() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final savedAccessToken = prefs.getString('access_token');
 
-    if (savedAccessToken != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Dashboard()),
-      );
-      // Token akses sudah ada, mungkin pengguna sudah masuk
-      // Anda dapat memeriksa validitas token di sini
-      // Misalnya, jika token kedaluwarsa, Anda dapat mengarahkan pengguna untuk logout
-      // atau memperbarui token.
-    }
-  }
-
+  //   if (savedAccessToken != null) {
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => Dashboard()),
+  //     );
+  //     // Token akses sudah ada, mungkin pengguna sudah masuk
+  //     // Anda dapat memeriksa validitas token di sini
+  //     // Misalnya, jika token kedaluwarsa, Anda dapat mengarahkan pengguna untuk logout
+  //     // atau memperbarui token.
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _usernameController,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            cursorColor: kPrimaryColor,
-            decoration: InputDecoration(
-              hintText: "Username",
-              prefixIcon: Padding(
-                padding: const EdgeInsets.all(defaultPadding),
-                child: Icon(Icons.person),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Contoh 2 TextFormField'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Text Field 1'),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-            child: TextFormField(
-              controller: _passwordController,
-              textInputAction: TextInputAction.done,
-              obscureText: true,
-              cursorColor: kPrimaryColor,
-              decoration: InputDecoration(
-                hintText: "Password",
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(defaultPadding),
-                  child: Icon(Icons.lock),
-                ),
-              ),
+            SizedBox(height: 16.0),
+            TextFormField(
+              controller: _tglLahirController,
+              decoration: InputDecoration(labelText: 'Text Field 2'),
             ),
-          ),
-          const SizedBox(height: defaultPadding),
-          ElevatedButton(
+            Container(
+                child: ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Lupa(),
-                    ));
+                _login();
               },
-              child: Text('Lupa Password')),
-          const SizedBox(height: defaultPadding),
-          Hero(
-            tag: "login_btn",
-            child: ElevatedButton(
-              onPressed: _login,
-              child: Text(
-                "Login".toUpperCase(),
-              ),
-            ),
-          ),
-          const SizedBox(height: defaultPadding),
-          AlreadyHaveAnAccountCheck(
-            press: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return SignUpScreen();
-                  },
-                ),
-              );
-            },
-          ),
-        ],
+              child: Text('Verivikasi'),
+            ))
+          ],
+        ),
       ),
     );
   }
