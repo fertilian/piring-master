@@ -6,12 +6,18 @@ import 'package:marquee/marquee.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:piring_baru/Login/components/login_form.dart';
 import 'package:piring_baru/bloc/nav/bottom_nav.dart';
+import 'package:piring_baru/dashboard/faq.dart';
+import 'package:piring_baru/dashboard/form_imt.dart';
 import 'package:piring_baru/kalori/testingTotalKalori.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:piring_baru/model/user.dart';
+<<<<<<< Updated upstream
 
 import 'package:piring_baru/tambahDarah/tambahDarah.dart';
+=======
+import 'package:piring_baru/notifikasi/notifikasi.dart';
+>>>>>>> Stashed changes
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget {
@@ -165,11 +171,20 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     Container(
                       margin: EdgeInsets.only(right: 24),
-                      child: Transform.scale(
-                        scale: 1.5,
-                        child: Icon(
-                          Icons.notifications,
-                          color: Colors.yellow,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => Notifikasi(),
+                            ),
+                          );
+                        },
+                        child: Transform.scale(
+                          scale: 1.5,
+                          child: Icon(
+                            Icons.notifications,
+                            color: Colors.yellow,
+                          ),
                         ),
                       ),
                     ),
@@ -190,12 +205,12 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     child: GestureDetector(
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => InputBB(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FormIMT(),
+                          ),
+                        );
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -498,36 +513,52 @@ class _DashboardState extends State<Dashboard> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
+
                   margin: EdgeInsets.only(left: 20, right: 20),
-                  child: Padding(
-                    padding: EdgeInsets.all(15.0), // Padding untuk konten card
-                    child: Row(
-                      children: [
-                        // Gambar dari asset
-                        Container(
-                          width: 50.0, // Lebar gambar
-                          height: 50.0, // Tinggi gambar
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/shusi.webp'),
-                              fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => FAQPage(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding:
+                          EdgeInsets.all(15.0), // Padding untuk konten card
+                      child: Row(
+                        children: [
+                          // Gambar dari asset
+                          Container(
+                            width: 50.0, // Lebar gambar
+                            height: 50.0, // Tinggi gambar
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0),
+                              image: DecorationImage(
+                                image: AssetImage('assets/images/shusi.webp'),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 40.0,
-                        ),
-                        Center(
-                            child: Text(
-                          'Memiliki Pertanyaa Seputar \n Isi Piringku?',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ))
-                      ],
+                          SizedBox(
+                            width: 40.0,
+                          ),
+                          Center(
+                              child: Text(
+                            'Memiliki Pertanyaa Seputar \n Isi Piringku?',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ))
+                        ],
+                      ),
                     ),
                   ),
+<<<<<<< Updated upstream
                 ),
+=======
+                  // Card kedua (Salin dan sesuaikan elemen di atas untuk card selanjutnya)
+                ), // Card ketiga (Salin dan sesuaikan elemen di atas untuk card selanjutnya)
+>>>>>>> Stashed changes
               ],
             ),
           ),
